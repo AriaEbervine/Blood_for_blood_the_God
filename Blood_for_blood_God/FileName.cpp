@@ -131,8 +131,31 @@ void showText(Music music[],int songCount)
     }
 
 }
-void searchMusic() //!
+void searchMusic(Music music[], int songCount) //!
 {
+    if (songCount == 0)
+    {
+        cout << "Catalog is empty!\n";
+        return;
+    }
+    int const N = 100;
+    char searchAuthor[N];
+    cout << "Enter author name to search: ";
+    cin.ignore();
+    cin.getline(searchAuthor, N);
+
+    int j = 1;
+    for (int i = 0; i < songCount; i++)
+    {
+        if (strcmp(music[i].author, searchAuthor) == 0)
+        {
+            cout << "\nSong #" << j << ":\n";
+            cout << "Title: " << music[i].title << endl;
+            cout << "Author: " << music[i].author << endl;
+            cout << "Year: " << music[i].year << endl;
+            j++;
+        }
+    }
 
 }
 void ShowAllMusic(Music music[], int songCount)
@@ -169,7 +192,7 @@ int main()
             showText(catalog, songCount);
             break;
         case 5:
-            searchMusic;
+            searchMusic(catalog, songCount);
             break;
         case 6:
             ShowAllMusic(catalog, songCount);
