@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include "Func.h"
 using namespace std;
 
@@ -21,10 +22,62 @@ void displayMenu()
     cout << "4. Show text\n";
     cout << "5. Search songs by author\n";
     cout << "6. Show all songs\n";
+    cout << "7. Put song to file\n";
     cout << "0. Log out\n";
     cout << "Select an option: ";
 }
-void enterMusic(Music music[], int& songCount) 
+void saveSongsToFile(Music* songs, const char* filename) 
+{
+    FILE* file = nullptr;
+
+    if (fopen_s(&file, filename, "w") != 0) {
+        cout << "Error!\n";
+        return;
+    }
+    else
+    {
+        int a = 0;
+        cout << "Enter number of song:\n";
+        cin >> a;
+            fputs("Author: ", file);
+            fputs(songs[a].author, file);
+            fputs("\n", file);
+
+            fputs("Title: ", file);
+            fputs(songs[a].title, file);
+            fputs("\n", file);
+
+            fputs("Year: ", file);
+            fprintf(file, "%d", songs[a].year);
+            fputs("\n", file);
+
+            fputs("Text:\n", file);
+            fputs(songs[a].text, file);
+            fputs("\n\n", file);
+        
+    }
+    fclose(file);
+    cout << "Dounload is sucsesfull! " << filename << "\n";
+}
+
+void readMusicFromFile(const char* filename, Music music[], int songCount)
+{
+    FILE* file = nullptr;
+    if (fopen_s(&file, filename, "r") != 0)
+    {
+       cout << "Error!" << endl;
+       return;
+    }
+      char buffer[1000];
+
+     while (fgets(buffer, sizeof(buffer), file)) 
+     {
+       strcat_s(music[songCount].text, buffer); 
+     }
+
+        fclose(file);
+}
+void enterMusic(Music music[], int songCount, const char* filename)
 {
     if (songCount >= MAX_SONGS) 
     {
@@ -56,7 +109,7 @@ void enterMusic(Music music[], int& songCount)
     }
     else if (n==2)
     {
-        //פאיכ
+        readMusicFromFile( filename, music, songCount);
     }
     else
     {
@@ -171,7 +224,8 @@ int main()
 {
     Music catalog[MAX_SONGS];
     int songCount = 0;
-
+    const char* PATH = "\\music.txt";
+    const char* PATH2 = "\\enter.txt";
   int choice;
    do
    {
@@ -180,7 +234,7 @@ int main()
        switch (choice)
         {
         case 1:
-            enterMusic(catalog, songCount);
+            enterMusic(catalog, songCount, PATH2);
             break;
         case 2:
             deleteMusic(catalog, songCount);
@@ -196,6 +250,9 @@ int main()
             break;
         case 6:
             ShowAllMusic(catalog, songCount);
+            break;
+        case 7:
+            saveSongsToFile(catalog, PATH);
             break;
         default:
             cout << "Error";
