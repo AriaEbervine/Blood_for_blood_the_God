@@ -5,7 +5,7 @@ using namespace std;
 
 const int MAX_TEXT = 2000;
 const int MAX_SONGS = 10;
-
+int songCount = 0;
 struct Music
 {
     char title[100];
@@ -30,54 +30,60 @@ void saveSongsToFile(Music* songs, const char* filename)
 {
     FILE* file = nullptr;
 
-    if (fopen_s(&file, filename, "w") != 0) {
-        cout << "Error!\n";
-        return;
-    }
-    else
+    if (fopen_s(&file, filename, "w") == 0)
     {
         int a = 0;
         cout << "Enter number of song:\n";
         cin >> a;
-            fputs("Author: ", file);
-            fputs(songs[a].author, file);
-            fputs("\n", file);
+        fputs("Author: ", file);
+        fputs(songs[a].author, file);
+        fputs("\n", file);
 
-            fputs("Title: ", file);
-            fputs(songs[a].title, file);
-            fputs("\n", file);
+        fputs("Title: ", file);
+        fputs(songs[a].title, file);
+        fputs("\n", file);
 
-            fputs("Year: ", file);
-            fprintf(file, "%d", songs[a].year);
-            fputs("\n", file);
+        fputs("Year: ", file);
+        fprintf(file, "%d", songs[a].year);
+        fputs("\n", file);
 
-            fputs("Text:\n", file);
-            fputs(songs[a].text, file);
-            fputs("\n\n", file);
-        
-    }
-    fclose(file);
-    cout << "Dounload is sucsesfull! " << filename << "\n";
-}
-
-void readMusicFromFile(const char* filename, Music music[], int songCount)
-{
-    FILE* file = nullptr;
-    if (fopen_s(&file, filename, "r") != 0)
-    {
-       cout << "Error!" << endl;
-       return;
-    }
-      char buffer[1000];
-
-     while (fgets(buffer, sizeof(buffer), file)) 
-     {
-       strcat_s(music[songCount].text, buffer); 
-     }
-
+        fputs("Text:\n", file);
+        fputs(songs[a].text, file);
+        fputs("\n\n", file);
         fclose(file);
+        cout << "Dounload is sucsesfull! " << filename << "\n";
+    }
+    else
+    {
+            cout << "Error!\n";
+            return;
+    }
 }
-void enterMusic(Music music[], int songCount, const char* filename)
+
+
+
+void readMusicFromFile(const char* filename, Music music[], int songCount) {
+    FILE* file = nullptr;
+    if (fopen_s(&file, filename, "r") == 0) {
+        music[songCount].text[0] = '\0';  // Очищаем текст перед записью
+        char buffer[1000];
+
+        while (fgets(buffer, sizeof(buffer), file)) {
+            if (strlen(music[songCount].text) + strlen(buffer) < 2000) {  // Проверка переполнения
+                strcat_s(music[songCount].text, buffer);
+            }
+            else {
+                cout << "Text is too long! Truncated.\n";
+                break;
+            }
+        }
+        fclose(file);
+    }
+    else {
+        cout << "Error opening file!\n";
+    }
+}
+void enterMusic(Music music[], int &songCount, const char* filename)
 {
     if (songCount >= MAX_SONGS) 
     {
@@ -109,6 +115,7 @@ void enterMusic(Music music[], int songCount, const char* filename)
     }
     else if (n==2)
     {
+        
         readMusicFromFile( filename, music, songCount);
     }
     else
@@ -118,14 +125,6 @@ void enterMusic(Music music[], int songCount, const char* filename)
     
     songCount++;
     cout << "Song added successfully!\n";
-
-   /* int size = 0;
-    const int N = 1000;
-    char arr[N];
-    cin >> arr;
-    size = strlen(arr) + 1;
-    music->text = new char[size];
-    strcpy_s(music->text, size, arr);*/
 }
 
 void deleteMusic(Music music[], int& songCount)
@@ -151,14 +150,31 @@ void deleteMusic(Music music[], int& songCount)
     songCount--;
     cout << "Song deleted!\n";
 }
-void changeMusic(Music music[], int& songCount) //!
+
+void changeMusic(Music music[], int& songCount)
 {
-    if (songCount == 0) 
+    if (songCount == 0)
     {
         cout << "Catalog is empty!\n";
         return;
     }
+    cout << "Enter song number to change (1-" << songCount << "): ";
+    int index;
+    cin >> index;
+    index--;
 
+    if (index < 0 || index >= songCount)
+    {
+        cout << "Error song number!\n";
+        return;
+    }
+    else
+    {
+        cin.ignore(); 
+        cout << "Enter new song text: ";
+        cin.getline(music[index].text, MAX_TEXT);
+    }
+    cout << "Song text updated successfully!\n";
 }
 void showText(Music music[],int songCount)
 {
@@ -223,9 +239,9 @@ void ShowAllMusic(Music music[], int songCount)
 int main()
 {
     Music catalog[MAX_SONGS];
-    int songCount = 0;
-    const char* PATH = "\\music.txt";
-    const char* PATH2 = "\\enter.txt";
+   
+    const char* PATH = "music.txt";
+    const char* PATH2 = "enter.txt";
   int choice;
    do
    {
